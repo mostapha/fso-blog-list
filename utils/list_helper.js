@@ -19,24 +19,30 @@ const favoriteBlog  = blogs => {
   }
 }
 
-// The function returns the author who has the largest amount of blogs.
-// The return value also contains the number of blogs the top author has:
-
 const mostBlogs = blogs => {
-  const authorsStats = blogs.reduce((cb, b) => {
-    if(cb[b.author]){
-      cb[b.author]++
-    } else {
-      cb[b.author] = 1
-    }
+  const authorsBlogs = blogs.reduce((cb, b) => {
+    if (cb[b.author]) cb[b.author]++
+    else cb[b.author] = 1
     return cb
   }, {})
 
-  const [author, numberOfBlogs] = Object.entries(authorsStats).sort((a,b) => b[1]-a[1])[0]
+  const [author, numberOfBlogs] = Object.entries(authorsBlogs).sort((a,b) => b[1]-a[1])[0]
 
   return { author, numberOfBlogs }
 }
 
+const mostLikes = blogs => {
+  const authorsLikes = blogs.reduce((cb, b) => {
+    if (cb[b.author]) cb[b.author] += b.likes
+    else cb[b.author] = b.likes
+    return cb
+  }, {})
+
+  const [author, numberOfLikes] = Object.entries(authorsLikes).sort((a,b) => b[1]-a[1])[0]
+
+  return { author, numberOfLikes }
+}
+
 module.exports = {
-  dummy, totalLikes, favoriteBlog, mostBlogs
+  dummy, totalLikes, favoriteBlog, mostBlogs, mostLikes
 }
