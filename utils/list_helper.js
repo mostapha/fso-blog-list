@@ -19,6 +19,24 @@ const favoriteBlog  = blogs => {
   }
 }
 
+// The function returns the author who has the largest amount of blogs.
+// The return value also contains the number of blogs the top author has:
+
+const mostBlogs = blogs => {
+  const authorsStats = blogs.reduce((cb, b) => {
+    if(cb[b.author]){
+      cb[b.author]++
+    } else {
+      cb[b.author] = 1
+    }
+    return cb
+  }, {})
+
+  const [author, numberOfBlogs] = Object.entries(authorsStats).sort((a,b) => b[1]-a[1])[0]
+
+  return { author, numberOfBlogs }
+}
+
 module.exports = {
-  dummy, totalLikes, favoriteBlog
+  dummy, totalLikes, favoriteBlog, mostBlogs
 }
