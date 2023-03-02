@@ -8,7 +8,7 @@ const helper = require('./test_helper')
 
 const api = supertest(app)
 
-beforeEach(async () => {
+beforeAll(async () => {
   await Blog.deleteMany({})
 
   const blogObject = helper.initialBlogs
@@ -23,6 +23,10 @@ test('returns the correct amount of blog posts in the JSON format', async () => 
   expect(response.body).toHaveLength(helper.initialBlogs.length)
 })
 
+test('the unique identifier property of the blog posts is named id', async () => {
+  const response = await api.get('/api/blogs')
+  expect(response.body[0].id).toBeDefined()
+})
 
 afterAll(async () => {
   await mongoose.connection.close()
