@@ -2,33 +2,40 @@
 
 const initialBlogs = [
   {
-    'name': 'Flourish',
+    'title': 'Flourish',
     'author': 'Candace Grace',
     'likes': 126,
     'url': 'https://www.flourishblog.com/'
   },  {
-    'name': 'Nimble Mind',
+    'title': 'Nimble Mind',
     'author': 'Ella Nova',
     'likes': 80,
     'url': 'https://www.nimblemind.com/'
   },  {
-    'name': 'Starlight',
+    'title': 'Starlight',
     'author': 'Jasmine Stone',
     'likes': 234,
     'url': 'https://www.starlightblog.com/'
   },  {
-    'name': 'Chirp',
+    'title': 'Chirp',
     'author': 'Oliver Finch',
     'likes': 67,
     'url': 'https://www.chirpblog.net/'
   },  {
-    'name': 'Ripple',
+    'title': 'Ripple',
     'author': 'Avery Drake',
     'likes': 312,
     'url': 'https://www.rippleblog.com/'
   }
 ]
 
+const blogToBeAdded = {
+  'title': 'Gleaming Thoughts',
+  'author': 'Adrianne Smith',
+  'likes': 1500,
+  'url': 'https://www.gleamingthoughts.com/'
+}
+
 module.exports = {
-  initialBlogs
+  initialBlogs, blogToBeAdded
 }

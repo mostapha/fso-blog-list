@@ -8,7 +8,7 @@ const helper = require('./test_helper')
 
 const api = supertest(app)
 
-beforeAll(async () => {
+beforeEach(async () => {
   await Blog.deleteMany({})
 
   const blogObject = helper.initialBlogs
@@ -26,6 +26,17 @@ test('returns the correct amount of blog posts in the JSON format', async () => 
 test('the unique identifier property of the blog posts is named id', async () => {
   const response = await api.get('/api/blogs')
   expect(response.body[0].id).toBeDefined()
+})
+
+test('successfully creates a new blog post', async () => {
+  await api.post('/api/blogs')
+    .send(helper.blogToBeAdded)
+    .expect(201)
+
+  const response = await api.get('/api/blogs')
+
+  expect(response.body.length).toEqual(6)
+  expect(response.body.at(-1)).toMatchObject(helper.blogToBeAdded)
 })
 
 afterAll(async () => {
