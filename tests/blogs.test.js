@@ -47,6 +47,18 @@ test('if the likes property is missing from the request the value zero is used i
   })
 })
 
+test('if the title or url properties are missing the backend responds with 400 status code', async () => {
+
+  await api.post('/api/blogs')
+    .send(helper.blogWithoutTitle)
+    .expect(400)
+
+  await api.post('/api/blogs')
+    .send(helper.blogWithoutUrl)
+    .expect(400)
+
+})
+
 afterAll(async () => {
   await mongoose.connection.close()
 })

@@ -42,6 +42,18 @@ const blogWithoutLikesProp = {
   'url': 'https://www.sparklingink.com/'
 }
 
+const blogWithoutTitle = {
+  'author': 'Nina Hernandez',
+  'likes': 3000,
+  'url': 'https://www.radiantpages.com/'
+}
+
+const blogWithoutUrl = {
+  'title': 'Radiant Pages',
+  'author': 'Nina Hernandez',
+  'likes': 3000
+}
+
 module.exports = {
-  initialBlogs, blogToBeAdded, blogWithoutLikesProp
+  initialBlogs, blogToBeAdded, blogWithoutLikesProp, blogWithoutTitle, blogWithoutUrl
 }

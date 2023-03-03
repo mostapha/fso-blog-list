@@ -13,6 +13,19 @@ blogsRouter.post('/', async (request, response) => {
     ...request.body,
     ...(request.body.likes === undefined && { likes: 0 })
   }
+
+  if(blogInfo.title === undefined){
+    return response.status(400).json({
+      error: 'The blog title is required'
+    })
+  }
+
+  if(blogInfo.url === undefined){
+    return response.status(400).json({
+      error: 'The blog url is required'
+    })
+  }
+
   const blog = new Blog(blogInfo)
   const result = await blog.save()
   response.status(201).json(result)
