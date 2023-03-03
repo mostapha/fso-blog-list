@@ -75,6 +75,29 @@ test('deletes a blog post successfully', async () => {
 
 })
 
+test('updates a blog post successfully', async () => {
+
+  const response = await api.get('/api/blogs')
+  const lastPost = response.body.at(-1)
+  const randomNumber = Math.floor(Math.random() * 1000)
+
+  await api
+    .put('/api/blogs/' + lastPost.id)
+    .send({
+      ...lastPost,
+      likes: randomNumber
+    })
+    .expect(200)
+
+  const second_response = await api.get('/api/blogs')
+
+  expect(second_response.body).not.toContainEqual({
+    'id': lastPost.id,
+    'likes': randomNumber
+  })
+
+})
+
 afterAll(async () => {
   await mongoose.connection.close()
 })
