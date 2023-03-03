@@ -39,6 +39,14 @@ test('successfully creates a new blog post', async () => {
   expect(response.body.at(-1)).toMatchObject(helper.blogToBeAdded)
 })
 
+test('if the likes property is missing from the request the value zero is used instead', async () => {
+  const response = await api.post('/api/blogs').send(helper.blogWithoutLikesProp)
+
+  expect(response.body).toMatchObject({
+    likes: 0
+  })
+})
+
 afterAll(async () => {
   await mongoose.connection.close()
 })

@@ -36,6 +36,12 @@ const blogToBeAdded = {
   'url': 'https://www.gleamingthoughts.com/'
 }
 
+const blogWithoutLikesProp = {
+  'title': 'Sparkling Ink',
+  'author': 'Cameron Grant',
+  'url': 'https://www.sparklingink.com/'
+}
+
 module.exports = {
-  initialBlogs, blogToBeAdded
+  initialBlogs, blogToBeAdded, blogWithoutLikesProp
 }
