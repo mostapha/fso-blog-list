@@ -59,6 +59,22 @@ test('if the title or url properties are missing the backend responds with 400 s
 
 })
 
+test('deletes a blog post successfully', async () => {
+
+  const response = await api.get('/api/blogs')
+  const lastPost = response.body.at(-1)
+
+  await api.delete('/api/blogs/' + lastPost.id)
+    .expect(204)
+
+  const second_response = await api.get('/api/blogs')
+
+  expect(second_response.body).not.toContainEqual({
+    'id': lastPost.id
+  })
+
+})
+
 afterAll(async () => {
   await mongoose.connection.close()
 })
