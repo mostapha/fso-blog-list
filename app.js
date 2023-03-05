@@ -7,6 +7,7 @@ const app = express()
 const cors = require('cors')
 const middleware = require('./utils/middleware')
 
+mongoose.set('strictQuery', false)
 
 const blogsRouter = require('./controllers/blogs')
 const usersRouter = require('./controllers/users')

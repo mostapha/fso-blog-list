@@ -1,34 +1,50 @@
 const blogsRouter = require('express').Router()
 const Blog = require('../models/blog')
-
+const User = require('../models/user')
 
 blogsRouter.get('/', async (request, response) => {
-  const blogs = await Blog.find({})
+  const blogs = await Blog.find({}).populate('user')
   response.json(blogs)
 })
 
 blogsRouter.post('/', async (request, response) => {
 
-  const blogInfo = {
-    ...request.body,
-    ...(request.body.likes === undefined && { likes: 0 })
-  }
+  const { title, author, likes, url } = request.body
 
-  if(blogInfo.title === undefined){
+  if(title === undefined){
     return response.status(400).json({
       error: 'The blog title is required'
     })
   }
 
-  if(blogInfo.url === undefined){
+  if(url === undefined){
     return response.status(400).json({
       error: 'The blog url is required'
     })
   }
 
-  const blog = new Blog(blogInfo)
-  const result = await blog.save()
-  response.status(201).json(result)
+  const user = await User.findOne({})
+
+  const blog = new Blog({
+    title,
+    author,
+    url,
+    likes: likes === undefined ? 0 : likes,
+    user: user.id
+  })
+
+  const savedBlog = await blog.save()
+
+  user.blogs = user.blogs.concat(savedBlog._id)
+  await user.save()
+
+  response.status(201).json(savedBlog)
+})
+
+// helper and not within exercises
+blogsRouter.delete('/all', async (request, response) => {
+  const { deletedCount } = await Blog.deleteMany({})
+  response.status(200).json({ deletedCount })
 })
 
 blogsRouter.delete('/:id', async (request, response) => {
@@ -57,4 +73,5 @@ blogsRouter.put('/:id', async (request, response) => {
 
   response.json(updatedPerson)
 })
+
 module.exports = blogsRouter
