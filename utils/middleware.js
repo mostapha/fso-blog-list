@@ -26,6 +26,15 @@ const userExtractor = (request, response, next) => {
   next()
 }
 
+const requireAuth = (request, response, next) => {
+  if(!request.user){
+    return response.status(401).json({
+      error: 'you must be authenticated to make this action'
+    })
+  }
+  next()
+}
+
 const errorHandler = (error, request, response, next) => {
   logger.error(error.message)
 
@@ -44,5 +53,6 @@ module.exports = {
   unknownEndpoint,
   errorHandler,
   tokenExtractor,
-  userExtractor
+  userExtractor,
+  requireAuth
 }

@@ -1,13 +1,14 @@
 const blogsRouter = require('express').Router()
 const Blog = require('../models/blog')
 const User = require('../models/user')
+const middleware = require('../utils/middleware')
 
 blogsRouter.get('/', async (request, response) => {
   const blogs = await Blog.find({}).populate('user', { username:1, name:1, id: 1 })
   response.json(blogs)
 })
 
-blogsRouter.post('/', async (request, response) => {
+blogsRouter.post('/', middleware.requireAuth, async (request, response) => {
   const { title, author, likes, url } = request.body
 
   if(title === undefined){
@@ -41,23 +42,23 @@ blogsRouter.post('/', async (request, response) => {
 })
 
 // helper and not within exercises
-blogsRouter.delete('/all', async (request, response) => {
+blogsRouter.delete('/all', middleware.requireAuth, async (request, response) => {
   const { deletedCount } = await Blog.deleteMany({})
   response.status(200).json({ deletedCount })
 })
 
-blogsRouter.delete('/:id', async (request, response) => {
-  const blog = await Blog.findById(request.params.id)
 
+blogsRouter.delete('/:id', middleware.requireAuth, async (request, response) => {
+  const blog = await Blog.findById(request.params.id)
   if(blog.user.toString() !== request.user){
-    return response.status(403).json({ error: 'you can only delete blogs you created' })
+    return response.status(401).json({ error: 'you can only delete blogs you created' })
   }
 
   await Blog.findByIdAndRemove(request.params.id)
   response.status(204).end()
 })
 
-blogsRouter.put('/:id', async (request, response) => {
+blogsRouter.put('/:id', middleware.requireAuth, async (request, response) => {
   const { title, author, likes = 0, url } = request.body
 
   if(title === undefined){

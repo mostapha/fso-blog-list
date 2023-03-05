@@ -2,17 +2,58 @@ const mongoose = require('mongoose')
 const supertest = require('supertest')
 const app = require('../app')
 const Blog = require('../models/blog')
+const User = require('../models/user')
 const helper = require('./test_helper')
+const jwt = require('jsonwebtoken')
 
 
 const api = supertest(app)
+
+
+
+let token, userId
+
+beforeAll(async () => {
+  const userInfo = {
+    username: 'Mostapha',
+    name: 'Mustapha Bouh',
+    password: '123456'
+  }
+  // delete users
+  await User.deleteMany({})
+
+  // create new user
+  await api.post('/api/users')
+    .send({
+      'username': userInfo.username,
+      'name': userInfo.name,
+      'password': userInfo.password
+    })
+
+  const LoginRes = await api.post('/api/login')
+    .send({
+      'username': userInfo.username,
+      'password': userInfo.password
+    })
+
+
+  // save token
+  token = LoginRes.body.token
+
+  // save user
+  const decodedToken = jwt.verify(token, process.env.SECRET)
+  userId = decodedToken.id.toString()
+})
 
 describe('when we get blogs from backend', () => {
   beforeAll(async () => {
     await Blog.deleteMany({})
 
     const blogObject = helper.initialBlogs
-      .map(blog => new Blog(blog))
+      .map(blog => new Blog({
+        ...blog,
+        user: userId
+      }))
     const promiseArray = blogObject.map(blog => blog.save())
     await Promise.all(promiseArray)
   })
@@ -29,44 +70,50 @@ describe('when we get blogs from backend', () => {
   })
 })
 
-describe('when we add a new blog', () => {
+describe('adding a new blog', () => {
   beforeEach(async () => {
     await Blog.deleteMany({})
-
-    const blogObject = helper.initialBlogs
-      .map(blog => new Blog(blog))
-    const promiseArray = blogObject.map(blog => blog.save())
-    await Promise.all(promiseArray)
   })
 
-  test('it succeeds with valid data', async () => {
+  test('succeeds with valid data', async () => {
     await api.post('/api/blogs')
       .send(helper.blogToBeAdded)
+      .set('Authorization', `Bearer ${token}`)
       .expect(201)
 
     const savedBlogs = await helper.blogsInDb()
 
-    expect(savedBlogs).toHaveLength(helper.initialBlogs.length + 1)
+    expect(savedBlogs).toHaveLength(1)
     expect(savedBlogs.at(-1)).toMatchObject(helper.blogToBeAdded)
   })
 
-  test('it defaults the value of likes property to zero when it\'s missing', async () => {
-    const response = await api.post('/api/blogs').send(helper.blogWithoutLikesProp)
+  test('fails if token is not provided', async () => {
+    await api.post('/api/blogs')
+      .send(helper.blogToBeAdded)
+      .expect(401)
+  })
+
+  test('defaults the value of likes property to zero when it\'s missing', async () => {
+    const response = await api.post('/api/blogs')
+      .send(helper.blogWithoutLikesProp)
+      .set('Authorization', `Bearer ${token}`)
+
     expect(response.body).toMatchObject({
       likes: 0
     })
   })
 
-  test('it responds with 400 status code if the title or url properties are missing', async () => {
+  test('responds with 400 status code if the title or url properties are missing', async () => {
     await api.post('/api/blogs')
       .send(helper.blogWithoutTitle)
+      .set('Authorization', `Bearer ${token}`)
       .expect(400)
 
     await api.post('/api/blogs')
       .send(helper.blogWithoutUrl)
+      .set('Authorization', `Bearer ${token}`)
       .expect(400)
   })
-
 })
 
 describe('when we manage the backend', () => {
@@ -74,7 +121,10 @@ describe('when we manage the backend', () => {
     await Blog.deleteMany({})
 
     const blogObject = helper.initialBlogs
-      .map(blog => new Blog(blog))
+      .map(blog => new Blog({
+        ...blog,
+        user: userId
+      }))
     const promiseArray = blogObject.map(blog => blog.save())
     await Promise.all(promiseArray)
   })
@@ -83,7 +133,9 @@ describe('when we manage the backend', () => {
     const initialBlogs = await helper.blogsInDb()
     const lastPost = initialBlogs.at(-1)
 
-    await api.delete('/api/blogs/' + lastPost.id)
+    await api
+      .delete('/api/blogs/' + lastPost.id)
+      .set('Authorization', `Bearer ${token}`)
       .expect(204)
 
     const updatedBackend = await helper.blogsInDb()
@@ -91,7 +143,15 @@ describe('when we manage the backend', () => {
     expect(updatedBackend).not.toMatchObject({
       'id': lastPost.id
     })
+  })
 
+  test('deleting a blog fails when not authenticated', async () => {
+    const initialBlogs = await helper.blogsInDb()
+    const lastPost = initialBlogs.at(-1)
+
+    await api
+      .delete('/api/blogs/' + lastPost.id)
+      .expect(401)
   })
 
   test('we can update a blog', async () => {
@@ -104,6 +164,7 @@ describe('when we manage the backend', () => {
 
     await api
       .put('/api/blogs/' + randomBlog.id)
+      .set('Authorization', `Bearer ${token}`)
       .send({
         ...randomBlog,
         likes: randomLikesNumber
@@ -118,7 +179,6 @@ describe('when we manage the backend', () => {
       'id': randomBlog.id,
       'likes': randomLikesNumber
     })
-
   })
 })
 
